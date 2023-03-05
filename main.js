@@ -22,18 +22,10 @@ var spawnY = 85;
 
 console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 console.log("")
-console.log("  _    _                 ____        _   ")
-console.log(" | |  | |               |  _ \\      | |  ")
-console.log(" | |__| |_   _ _   _ ___| |_) | ___ | |_ ")
-console.log(" |  __  | | | | | | / __|  _ < / _ \\| __|")
-console.log(" | |  | | |_| | |_| \\__ \\ |_) | (_) | |_ ")
-console.log(" |_|  |_|\\__,_|\\__, |___/____/ \\___/ \\__|")
-console.log("                __/ |                    ")
 console.log("")
+console.log("FreeMoneyHub Pit Autogrinder...............")
 console.log("")
-console.log("Huys Pit Bot Discord.gg/Huys")
-console.log("")
-console.log("")
+console.log("GitHub : FreeMoneyHyb")
 console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
 const accounts = [
