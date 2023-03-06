@@ -46,6 +46,16 @@ const rl = readline.createInterface({
 
 let messageLogged = false;
 
+rl.on('line', (input) => {
+  if (input === 'start') {
+    messageLogged = false;
+  } else if (input === 'stop') {
+    messageLogged = false;
+  } else if (input === 'play') {
+    messageLogged = false;
+  } else if (input === 'run') {
+  }
+});
 const bots = [];
     for (const account of accounts) {
       setTimeout(() => {
@@ -100,7 +110,7 @@ const bots = [];
       }
     });
 
-  bot.on('physicTick', () => {
+   bot.on('physicTick', () => {
       if (enabled) {
           const ppx = Math.floor(Math.random() * 9) - 4;
           const ppz = Math.floor(Math.random() * 9) - 4;
@@ -130,10 +140,8 @@ const bots = [];
                     function wrapAngle(angle) {
                       return (angle + Math.PI) % (2 * Math.PI) - Math.PI;
                     }
-
                     const offsetz = Math.random() * (1 - 0.5) + 0.5;
                     const nearestPlayer = bot.nearestEntity(e => e.type === 'player');
-
                     if (nearestPlayer) {
                       const targetPos = bot.nearestEntity(e => e.type === 'player').position.offset(0, offsetz, 0);
                       const deltaX = targetPos.x - bot.entity.position.x;
@@ -142,34 +150,30 @@ const bots = [];
                       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
                       const targetYaw = Math.atan2(-deltaX, -deltaZ);
                       let yawDiff = wrapAngle(targetYaw - bot.entity.yaw);
-                      if (yawDiff > Math.PI / 4) {
-                        yawDiff = Math.PI / 4;
-                      } else if (yawDiff < -Math.PI / 4) {
-                        yawDiff = -Math.PI / 4;
-                      }
+                      const maxYawDiff = Math.PI / 4;
+                      yawDiff = Math.max(Math.min(yawDiff, maxYawDiff), -maxYawDiff);
+                      const numHeadMovements = Math.ceil(Math.abs(yawDiff) / (Math.PI / 8));
+                      const yawStep = yawDiff / numHeadMovements;
                       const targetPitch = Math.asin(deltaY / distance);
                       let pitchDiff = targetPitch - bot.entity.pitch;
-                      const pitchThreshold = Math.PI / 8; // limit pitch angle to 22.5 degrees
-                      if (pitchDiff > pitchThreshold) {
-                        pitchDiff = pitchThreshold;
-                      } else if (pitchDiff < -pitchThreshold) {
-                        pitchDiff = -pitchThreshold;
+                      const maxPitchDiff = Math.PI / 144;
+                      pitchDiff = Math.max(Math.min(pitchDiff, maxPitchDiff), -maxPitchDiff);
+                      const numPitchMovements = Math.ceil(Math.abs(pitchDiff) / (Math.PI / 8));
+                      const pitchStep = pitchDiff / numPitchMovements;
+                      const maxPitch = 0;
+                      const maxYaw = 120; 
+                      let clampedPitch = bot.entity.pitch;
+                      let clampedYaw = bot.entity.yaw;
+                      for (let i = 0; i < numPitchMovements; i++) {
+                        clampedPitch = Math.max(Math.min(clampedPitch + pitchStep, maxPitch), -maxPitch);
+                        for (let j = 0; j < numHeadMovements; j++) {
+                          clampedYaw = Math.max(Math.min(clampedYaw + yawStep, maxYaw), -maxYaw);
+                          bot.look(clampedYaw, clampedPitch, true);
+                          setTimeout(() => {
+                            bot.look(clampedYaw, clampedPitch, true);
+                          }, 65);
+                        }
                       }
-
-                      // Set the max pitch and yaw values to the middle numbers of their ranges
-                      const maxPitch = 0; // 0 degrees
-                      const maxYaw = 120; // 180 degrees / 2 = 90 degrees
-
-                      // Clamp the pitch and yaw values within their respective ranges
-                      const clampedPitch = Math.max(Math.min(bot.entity.pitch + pitchDiff, maxPitch), -maxPitch);
-                      const clampedYaw = Math.max(Math.min(bot.entity.yaw + yawDiff, maxYaw), -maxYaw);
-
-                      bot.look(clampedYaw, clampedPitch, true);
-
-                      // Set a delay of 500ms before the next rotation
-                      setTimeout(() => {
-                        bot.look(clampedYaw, clampedPitch, true);
-                      }, 15);
                     }
                   if (bot.getControlState('jump') == false) bot.setControlState('jump', true);
                   if (strafes < 10) {
