@@ -100,7 +100,7 @@ const bots = [];
       }
     });
 
-   bot.on('physicTick', () => {
+  bot.on('physicTick', () => {
       if (enabled) {
           const ppx = Math.floor(Math.random() * 9) - 4;
           const ppz = Math.floor(Math.random() * 9) - 4;
@@ -127,11 +127,50 @@ const bots = [];
               if (silents) {
                 strafes++;
                 if (boty < spawnY) {
-                  const offsetz = Math.random() * (1 - 0.5) + 0.5;
-                  const nearestPlayer = bot.nearestEntity(e => e.type === 'player');
-                  if (nearestPlayer) {
-                    bot.lookAt(bot.nearestEntity(e => e.type === 'player').position.offset(0, offsetz, 0));
-                  }
+                    function wrapAngle(angle) {
+                      return (angle + Math.PI) % (2 * Math.PI) - Math.PI;
+                    }
+
+                    const offsetz = Math.random() * (1 - 0.5) + 0.5;
+                    const nearestPlayer = bot.nearestEntity(e => e.type === 'player');
+
+                    if (nearestPlayer) {
+                      const targetPos = bot.nearestEntity(e => e.type === 'player').position.offset(0, offsetz, 0);
+                      const deltaX = targetPos.x - bot.entity.position.x;
+                      const deltaY = targetPos.y - bot.entity.position.y;
+                      const deltaZ = targetPos.z - bot.entity.position.z;
+                      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+                      const targetYaw = Math.atan2(-deltaX, -deltaZ);
+                      let yawDiff = wrapAngle(targetYaw - bot.entity.yaw);
+                      if (yawDiff > Math.PI / 4) {
+                        yawDiff = Math.PI / 4;
+                      } else if (yawDiff < -Math.PI / 4) {
+                        yawDiff = -Math.PI / 4;
+                      }
+                      const targetPitch = Math.asin(deltaY / distance);
+                      let pitchDiff = targetPitch - bot.entity.pitch;
+                      const pitchThreshold = Math.PI / 8; // limit pitch angle to 22.5 degrees
+                      if (pitchDiff > pitchThreshold) {
+                        pitchDiff = pitchThreshold;
+                      } else if (pitchDiff < -pitchThreshold) {
+                        pitchDiff = -pitchThreshold;
+                      }
+
+                      // Set the max pitch and yaw values to the middle numbers of their ranges
+                      const maxPitch = 0; // 0 degrees
+                      const maxYaw = 120; // 180 degrees / 2 = 90 degrees
+
+                      // Clamp the pitch and yaw values within their respective ranges
+                      const clampedPitch = Math.max(Math.min(bot.entity.pitch + pitchDiff, maxPitch), -maxPitch);
+                      const clampedYaw = Math.max(Math.min(bot.entity.yaw + yawDiff, maxYaw), -maxYaw);
+
+                      bot.look(clampedYaw, clampedPitch, true);
+
+                      // Set a delay of 500ms before the next rotation
+                      setTimeout(() => {
+                        bot.look(clampedYaw, clampedPitch, true);
+                      }, 15);
+                    }
                   if (bot.getControlState('jump') == false) bot.setControlState('jump', true);
                   if (strafes < 10) {
                     if (bot.getControlState('left') == false) bot.setControlState('left', true);
@@ -143,17 +182,11 @@ const bots = [];
                       strafes = 0;
                     }
                   }
-                  const radius = Math.floor(Math.random() * (6 - 3.5 + 1) + 3.5); 
+                  const radius = Math.floor(Math.random() * (4.5 - 4 + 1) + 4); 
                   const player = bot.nearestEntity(entity => entity.type === 'player' && bot.entity.position.distanceTo(entity.position) <= radius);
-
                   if (player) {
-                    const angleToPlayer = Math.atan2(player.position.z - bot.entity.position.z, player.position.x - bot.entity.position.x);
-                    const angleDiff = (angleToPlayer - bot.entity.yaw) % (2 * Math.PI);
-
-                    if (Math.abs(angleDiff) < (fovDegrees / 2) * (Math.PI / 180)) {
                       bot.attack(player);
                     }
-                  }
                 } else {
                   bot.lookAt(new Vec3(ppx, boty, ppz));
                   if (bot.getControlState('jump') == true) bot.setControlState('jump', false);
@@ -219,3 +252,4 @@ const bots = [];
 });
   }, 3000);
 }
+
