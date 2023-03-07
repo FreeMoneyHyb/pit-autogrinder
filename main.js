@@ -142,6 +142,7 @@ const bots = [];
                     }
                     const offsetz = Math.random() * (1 - 0.5) + 0.5;
                     const nearestPlayer = bot.nearestEntity(e => e.type === 'player');
+                    const randomDelaytzr = () => Math.floor(Math.random() * (75 - 45 + 1) + 45);
                     if (nearestPlayer) {
                       const targetPos = bot.nearestEntity(e => e.type === 'player').position.offset(0, offsetz, 0);
                       const deltaX = targetPos.x - bot.entity.position.x;
@@ -171,7 +172,7 @@ const bots = [];
                           bot.look(clampedYaw, clampedPitch, true);
                           setTimeout(() => {
                             bot.look(clampedYaw, clampedPitch, true);
-                          }, 65);
+                          }, randomDelaytzr());
                         }
                       }
                     }
@@ -217,6 +218,7 @@ const bots = [];
       bot.chat('/play pit');
       let playerCount = Object.keys(bot.players).filter(name => !bot.players[name].isBot).length;
       hook1.send(`${bot.username}: Found New Lobby (Size ${playerCount})`)
+      console.log(`${bot.username}: Switched Lobbys (Size ${playerCount})`);
       sleep(1500)
       enabled = true
       silents = true
@@ -228,12 +230,12 @@ const bots = [];
         if (levelUpMatch) {
           const previousLevel = parseInt(levelUpMatch[1]);
           const newLevel = parseInt(levelUpMatch[2]);
+          console.log(`${bot.username}: LEVEL UP! ${newLevel}`);
           hook2.send(`${bot.username}: has leveled up from level ${previousLevel} to level ${newLevel}`);
         }
       }
     });
 
-    
     bot.on('messagestr', async (message) => {
       if (message.toLowerCase().includes(`a player has been removed from your game`)) {
         bot.once('playerLeft', (player) => {
@@ -246,6 +248,31 @@ const bots = [];
       if (message.toLowerCase().includes('bounty claimed')) {
         hook4.send(message); 
       }
+    });
+
+    bot.on('messagestr', async (message) => {
+      if (message.toLowerCase().includes('assist!') && message.includes('%')) {
+        console.log(message);
+        }
+    });
+
+    bot.on('messagestr', async (message) => {
+      if (message.toLowerCase().includes('death! by')) {
+        const regex = /DEATH! by \[\d+\] (\S+) VIEW RECAP/;
+        const match = message.match(regex);
+        if (match) {
+          const playerName = match[1];
+          console.log(`${bot.username} Died To ${playerName}`);
+        } else {
+          console.log(`ERROR: ${message}`);
+        }
+      }
+    });
+
+    bot.on('messagestr', async (message) => {
+      if (message.toLowerCase().includes('kill! on')) {
+        console.log(message);
+        }
     });
 
     bot.on('kicked', (reason) => {
