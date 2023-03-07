@@ -252,7 +252,7 @@ const bots = [];
 
     bot.on('messagestr', async (message) => {
       if (message.toLowerCase().includes('assist!') && message.includes('%')) {
-        console.log(message);
+        console.log(`${bot.username}: ${message}`);
         }
     });
 
@@ -271,7 +271,7 @@ const bots = [];
 
     bot.on('messagestr', async (message) => {
       if (message.toLowerCase().includes('kill! on')) {
-        console.log(message);
+        console.log(`${bot.username}: ${message}`);
         }
     });
 
