@@ -110,7 +110,7 @@ const bots = [];
       }
     });
 
-   bot.on('physicTick', () => {
+    bot.on('physicTick', () => {
       if (enabled) {
           const ppx = Math.floor(Math.random() * 9) - 4;
           const ppz = Math.floor(Math.random() * 9) - 4;
@@ -137,45 +137,46 @@ const bots = [];
               if (silents) {
                 strafes++;
                 if (boty < spawnY) {
-                    function wrapAngle(angle) {
-                      return (angle + Math.PI) % (2 * Math.PI) - Math.PI;
-                    }
-                    const offsetz = Math.random() * (1 - 0.5) + 0.5;
-                    const nearestPlayer = bot.nearestEntity(e => e.type === 'player');
-                    const randomDelaytzr = () => Math.floor(Math.random() * (75 - 45 + 1) + 45);
-                    if (nearestPlayer) {
-                      const targetPos = bot.nearestEntity(e => e.type === 'player').position.offset(0, offsetz, 0);
-                      const deltaX = targetPos.x - bot.entity.position.x;
-                      const deltaY = targetPos.y - bot.entity.position.y;
-                      const deltaZ = targetPos.z - bot.entity.position.z;
-                      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-                      const targetYaw = Math.atan2(-deltaX, -deltaZ);
-                      let yawDiff = wrapAngle(targetYaw - bot.entity.yaw);
-                      const maxYawDiff = Math.PI / 4;
-                      yawDiff = Math.max(Math.min(yawDiff, maxYawDiff), -maxYawDiff);
-                      const numHeadMovements = Math.ceil(Math.abs(yawDiff) / (Math.PI / 8));
-                      const yawStep = yawDiff / numHeadMovements;
-                      const targetPitch = Math.asin(deltaY / distance);
-                      let pitchDiff = targetPitch - bot.entity.pitch;
-                      const maxPitchDiff = Math.PI / 144;
-                      pitchDiff = Math.max(Math.min(pitchDiff, maxPitchDiff), -maxPitchDiff);
-                      const numPitchMovements = Math.ceil(Math.abs(pitchDiff) / (Math.PI / 8));
-                      const pitchStep = pitchDiff / numPitchMovements;
-                      const maxPitch = 0;
-                      const maxYaw = 120; 
-                      let clampedPitch = bot.entity.pitch;
-                      let clampedYaw = bot.entity.yaw;
-                      for (let i = 0; i < numPitchMovements; i++) {
-                        clampedPitch = Math.max(Math.min(clampedPitch + pitchStep, maxPitch), -maxPitch);
-                        for (let j = 0; j < numHeadMovements; j++) {
-                          clampedYaw = Math.max(Math.min(clampedYaw + yawStep, maxYaw), -maxYaw);
+                  function wrapAngle(angle) {
+                    return (angle + Math.PI) % (2 * Math.PI) - Math.PI;
+                  }
+
+                  const randomDelaytzr = () => Math.floor(Math.random() * (75 - 40 + 1) + 40);
+                  const offsetz = Math.random() * (1 - 0.5) + 0.5;
+                  const nearestPlayer = bot.nearestEntity(e => e.type === 'player');
+                  if (nearestPlayer) {
+                    const targetPos = bot.nearestEntity(e => e.type === 'player').position.offset(0, offsetz, 0);
+                    const deltaX = targetPos.x - bot.entity.position.x;
+                    const deltaY = targetPos.y - bot.entity.position.y;
+                    const deltaZ = targetPos.z - bot.entity.position.z;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+                    const targetYaw = Math.atan2(-deltaX, -deltaZ);
+                    let yawDiff = wrapAngle(targetYaw - bot.entity.yaw);
+                    const maxYawDiff = Math.PI / 2.8; // 125 degrees FOV
+                    yawDiff = Math.max(Math.min(yawDiff, maxYawDiff), -maxYawDiff);
+                    const numHeadMovements = Math.ceil(Math.abs(yawDiff) / (maxYawDiff / 8));
+                    const yawStep = yawDiff / numHeadMovements;
+                    const targetPitch = Math.asin(deltaY / distance);
+                    let pitchDiff = targetPitch - bot.entity.pitch;
+                    const maxPitchDiff = Math.PI / 144;
+                    pitchDiff = Math.max(Math.min(pitchDiff, maxPitchDiff), -maxPitchDiff);
+                    const numPitchMovements = Math.ceil(Math.abs(pitchDiff) / (Math.PI / 8));
+                    const pitchStep = pitchDiff / numPitchMovements;
+                    const maxPitch = 0;
+                    const maxYaw = 120;
+                    let clampedPitch = bot.entity.pitch;
+                    let clampedYaw = bot.entity.yaw;
+                    for (let i = 0; i < numPitchMovements; i++) {
+                      clampedPitch = Math.max(Math.min(clampedPitch + pitchStep, maxPitch), -maxPitch);
+                      for (let j = 0; j < numHeadMovements; j++) {
+                        clampedYaw = Math.max(Math.min(clampedYaw + yawStep, maxYaw), -maxYaw);
+                        bot.look(clampedYaw, clampedPitch, true);
+                        setTimeout(() => {
                           bot.look(clampedYaw, clampedPitch, true);
-                          setTimeout(() => {
-                            bot.look(clampedYaw, clampedPitch, true);
-                          }, randomDelaytzr());
-                        }
+                        }, randomDelaytzr());
                       }
                     }
+                  }
                   if (bot.getControlState('jump') == false) bot.setControlState('jump', true);
                   if (strafes < 10) {
                     if (bot.getControlState('left') == false) bot.setControlState('left', true);
