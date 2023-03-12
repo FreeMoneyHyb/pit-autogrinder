@@ -143,7 +143,7 @@ const bots = [];
 
                   const randomDelaytzr = () => Math.floor(Math.random() * (75 - 40 + 1) + 40);
                   const offsetz = Math.random() * (1 - 0.5) + 0.5;
-                  const nearestPlayer = bot.nearestEntity(e => e.type === 'player');
+                  const nearestPlayer = bot.nearestEntity(e => e.type === 'player' && e.position.y - bot.entity.position.y <= 3);
                   if (nearestPlayer) {
                     const targetPos = bot.nearestEntity(e => e.type === 'player').position.offset(0, offsetz, 0);
                     const deltaX = targetPos.x - bot.entity.position.x;
